@@ -34,10 +34,16 @@ pipeline {
             }
             steps {
                 sh '''
-                    test -f IkariDoTrainingBackend/bin/Debug/net8.0/IkariDoTrainingBackend.dll
+                    test -f **/bin/Debug/net8.0/IkariDoTrainingBackend.dll
 
-                    dotnet test --no-build
+                    dotnet test --logger:"junit;LogFilePath=test-results.xml" --no-build
                 '''
+            }
+        }
+
+        post {
+            always {
+                junit '**/test-results.xml'
             }
         }
     }
