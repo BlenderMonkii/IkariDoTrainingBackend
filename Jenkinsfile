@@ -27,7 +27,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    test -f bin/Debug/net8.0/IkariDoTrainingBackend.dll
+                    test -f IkariDoTrainingBackend/bin/Debug/net8.0/IkariDoTrainingBackend.dll
                 '''
             }
         }
