@@ -10,7 +10,6 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                    // Verwende das SDK-Image, da du bauen möchtest
                     image 'mcr.microsoft.com/dotnet/sdk:8.0'
                     reuseNode true
                 }
@@ -21,6 +20,14 @@ pipeline {
                     dotnet --version
                     dotnet restore
                     dotnet build
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '''
+                    test -f bin/Debug/net8.0/IkariDoTrainingBackend.dll
                 '''
             }
         }
