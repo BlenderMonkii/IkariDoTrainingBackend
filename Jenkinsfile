@@ -2,10 +2,20 @@ pipeline {
     agent any
 
     stages {
-        stage('Hello') {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/dotnet/sdk:8.0'
+                    reuseNode true
+                }
+            }
             steps {
-                sh 'echo "Hello from Jenkins"'
-                sh 'whoami'
+                sh '''
+                    ls -la
+                    dotnet --version
+                    dotnet restore
+                    dotnet build
+                '''
             }
         }
     }
