@@ -35,7 +35,8 @@ pipeline {
             steps {
                 sh '''
                     test -f **/bin/Debug/net8.0/IkariDoTrainingBackend.dll
-
+                    
+                    dotnet add package JunitXml.TestLogger
                     dotnet test --logger:"junit;LogFilePath=test-results.xml" --no-build
                 '''
             }
