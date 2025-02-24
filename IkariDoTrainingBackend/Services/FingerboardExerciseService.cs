@@ -17,7 +17,7 @@ namespace IkariDoTrainingBackend.Services
 
         public async Task<List<FingerboardExercise>> GetAllAsync()
         {
-            return await _context.FingerboardExercises.Include(e => e.Owner).ToListAsync();
+            return await _context.FingerboardExercises.Include(e => e.Owner).Include(e => e.Timer).ToListAsync();
         }
 
         public async Task<FingerboardExercise> CreateAsync(FingerboardExercise exercise)

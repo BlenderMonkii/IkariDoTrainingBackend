@@ -34,10 +34,11 @@ namespace IkariDoTrainingBackend.Models.Exercises
         [StringLength(255)]
         public string Location { get; set; }
 
-        [Column("repetitions")]
-        public int? Repetitions { get; set; } // TODO: Do we need this?
+        [Column("timer_id")]
+        public int? TimerId { get; set; }
 
-        //TODO: Adding Timer?
+        [ForeignKey("TimerId")]
+        public Timer? Timer { get; set; }
 
         [ForeignKey("OwnerId")]
         public User? Owner { get; set; }

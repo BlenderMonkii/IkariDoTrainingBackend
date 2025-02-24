@@ -11,7 +11,7 @@ namespace IkariDoTrainingBackend.Dtos
         public int? Duration { get; set; }
         public bool IsPublic { get; set; }
         public string? Location { get; set; }
-        public int? Repetitions { get; set; }
+        public Models.Timer? Timer { get; set; }
         public string ExerciseType { get; set; }
         public List<Execution> Executions { get; set; }
     }

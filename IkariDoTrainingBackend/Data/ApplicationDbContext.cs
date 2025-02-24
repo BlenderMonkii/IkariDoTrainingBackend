@@ -2,6 +2,7 @@
 using IkariDoTrainingBackend.Models;
 using IkariDoTrainingBackend.Models.Exercises;
 using Microsoft.EntityFrameworkCore;
+using Timer = IkariDoTrainingBackend.Models.Timer;
 
 namespace IkariDoTrainingBackend.Data
 {
@@ -54,7 +55,7 @@ namespace IkariDoTrainingBackend.Data
                 .WithMany(ex => ex.Executions)
                 .HasForeignKey(e => e.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
 
             // **Many-to-Many für Sessions & TrainingPlans**
             modelBuilder.Entity<Session>()

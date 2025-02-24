@@ -47,7 +47,7 @@ namespace IkariDoTrainingBackend.Services
                 Duration = e.Duration,
                 IsPublic = e.IsPublic,
                 Location = e.Location,
-                Repetitions = e.Repetitions,
+                Timer = e.Timer,
                 ExerciseType = e.GetType().Name, // Holt den Typnamen (z.B. "FingerboardExercise")
                 Executions = e.Executions.ToList()
             }).ToListAsync();

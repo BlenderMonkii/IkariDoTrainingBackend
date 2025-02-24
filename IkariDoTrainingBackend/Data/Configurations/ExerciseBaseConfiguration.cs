@@ -33,14 +33,17 @@ namespace IkariDoTrainingBackend.Data.Configurations
                    .HasColumnName("location")
                    .HasMaxLength(255);
 
-            builder.Property(e => e.Repetitions)
-                   .HasColumnName("repetitions");
-
             // Beziehung zu User (Owner)
             builder.HasOne(e => e.Owner)
                    .WithMany()
                    .HasForeignKey(e => e.OwnerId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            // Beziehung zu Timer
+            builder.HasOne(e => e.Timer)
+                   .WithMany()
+                   .HasForeignKey(e => e.TimerId)
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
