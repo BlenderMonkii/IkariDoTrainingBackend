@@ -19,6 +19,7 @@ namespace IkariDoTrainingBackend.Data
         public DbSet<ExerciseBase> Exercises { get; set; }
         public DbSet<SessionExercise> SessionExercises { get; set; }
         public DbSet<FingerboardExercise> FingerboardExercises { get; set; }
+        public DbSet<TrainingPlanSession> TrainingPlanSessions { get; set; }
 
         public DbSet<Execution> Executions { get; set; }
 
@@ -56,24 +57,21 @@ namespace IkariDoTrainingBackend.Data
                 .HasForeignKey(e => e.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Many-to-Many for TrainingPlans and Sessions
+            modelBuilder.Entity<TrainingPlanSession>()
+                .ToTable("training_plan_sessions")
+                .HasKey(tps => new { tps.TrainingPlanId, tps.SessionId });
 
-            // **Many-to-Many für Sessions & TrainingPlans**
-            modelBuilder.Entity<Session>()
-                .HasMany(s => s.TrainingPlans)
-                .WithMany(tp => tp.Sessions)
-                .UsingEntity<Dictionary<string, object>>(
-                    "training_plan_sessions", // Tabellenname in der DB
-                    j => j
-                        .HasOne<TrainingPlan>()
-                        .WithMany()
-                        .HasForeignKey("training_plan_id")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j => j
-                        .HasOne<Session>()
-                        .WithMany()
-                        .HasForeignKey("session_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                );
+            modelBuilder.Entity<TrainingPlanSession>()
+                .HasOne(tps => tps.TrainingPlan)
+                .WithMany(tp => tp.TrainingPlanSessions)
+                .HasForeignKey(tps => tps.TrainingPlanId);
+
+            modelBuilder.Entity<TrainingPlanSession>()
+                .HasOne(tps => tps.Session)
+                .WithMany(s => s.TrainingPlanSessions)
+                .HasForeignKey(tps => tps.SessionId);
+
         }
 
     }

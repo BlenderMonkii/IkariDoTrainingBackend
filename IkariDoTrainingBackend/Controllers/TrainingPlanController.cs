@@ -76,5 +76,16 @@ namespace IkariDoTrainingBackend.Controllers
 
             return Ok(plans);
         }
+
+        // GET /api/TrainingPlan/{planId}/session/{sessionId}
+        [HttpPost("{planId}/session/{sessionId}")]
+        public async Task<ActionResult<TrainingPlan>> AddSession(int planId, int sessionId)
+        {
+            var plan = await _trainingPlanService.AddSessionAsync(planId, sessionId);
+            if (plan == null) return NotFound();
+
+            return Ok(plan);
+        }
+
     }
 }

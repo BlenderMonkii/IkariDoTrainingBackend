@@ -36,6 +36,9 @@ namespace IkariDoTrainingBackend.Models
         [Column("is_public")]
         public bool IsPublic { get; set; }
 
-        public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
+        public virtual ICollection<TrainingPlanSession> TrainingPlanSessions { get; set; } = new List<TrainingPlanSession>();
+
+        [NotMapped]
+        public IEnumerable<Session> Sessions => TrainingPlanSessions.Select(tps => tps.Session);
     }
 }

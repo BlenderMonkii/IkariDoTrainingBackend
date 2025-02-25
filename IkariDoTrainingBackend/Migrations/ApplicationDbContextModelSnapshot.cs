@@ -262,21 +262,41 @@ namespace IkariDoTrainingBackend.Migrations
                     b.ToTable("training_plans");
                 });
 
+            modelBuilder.Entity("IkariDoTrainingBackend.Models.TrainingPlanSession", b =>
+                {
+                    b.Property<int>("TrainingPlanId")
+                        .HasColumnType("int")
+                        .HasColumnName("training_plan_id");
+
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int")
+                        .HasColumnName("session_id");
+
+                    b.HasKey("TrainingPlanId", "SessionId");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("training_plan_sessions", (string)null);
+                });
+
             modelBuilder.Entity("IkariDoTrainingBackend.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("email");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("name");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -285,22 +305,7 @@ namespace IkariDoTrainingBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("training_plan_sessions", b =>
-                {
-                    b.Property<int>("session_id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("training_plan_id")
-                        .HasColumnType("int");
-
-                    b.HasKey("session_id", "training_plan_id");
-
-                    b.HasIndex("training_plan_id");
-
-                    b.ToTable("training_plan_sessions");
+                    b.ToTable("users");
                 });
 
             modelBuilder.Entity("IkariDoTrainingBackend.Models.Exercises.FingerboardExercise", b =>
@@ -380,19 +385,23 @@ namespace IkariDoTrainingBackend.Migrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("training_plan_sessions", b =>
+            modelBuilder.Entity("IkariDoTrainingBackend.Models.TrainingPlanSession", b =>
                 {
-                    b.HasOne("IkariDoTrainingBackend.Models.Session", null)
-                        .WithMany()
-                        .HasForeignKey("session_id")
+                    b.HasOne("IkariDoTrainingBackend.Models.Session", "Session")
+                        .WithMany("TrainingPlanSessions")
+                        .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IkariDoTrainingBackend.Models.TrainingPlan", null)
-                        .WithMany()
-                        .HasForeignKey("training_plan_id")
+                    b.HasOne("IkariDoTrainingBackend.Models.TrainingPlan", "TrainingPlan")
+                        .WithMany("TrainingPlanSessions")
+                        .HasForeignKey("TrainingPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Session");
+
+                    b.Navigation("TrainingPlan");
                 });
 
             modelBuilder.Entity("IkariDoTrainingBackend.Models.Exercises.FingerboardExercise", b =>
@@ -414,6 +423,13 @@ namespace IkariDoTrainingBackend.Migrations
             modelBuilder.Entity("IkariDoTrainingBackend.Models.Session", b =>
                 {
                     b.Navigation("SessionExercises");
+
+                    b.Navigation("TrainingPlanSessions");
+                });
+
+            modelBuilder.Entity("IkariDoTrainingBackend.Models.TrainingPlan", b =>
+                {
+                    b.Navigation("TrainingPlanSessions");
                 });
 #pragma warning restore 612, 618
         }

@@ -64,7 +64,43 @@ namespace IkariDoTrainingBackend.Services
         {
             return await _context.TrainingPlans
                 .Where(tp => tp.OwnerId == ownerId)
+                .Include(tp => tp.TrainingPlanSessions)
+                    .ThenInclude(tps => tps.Session)
                 .ToListAsync();
         }
+
+
+        public async Task<TrainingPlan> AddSessionAsync(int planId, int sessionId)
+        {
+            var plan = await _context.TrainingPlans
+                .Include(tp => tp.TrainingPlanSessions)
+                .FirstOrDefaultAsync(tp => tp.Id == planId);
+
+            if (plan == null) return null;
+
+            var session = await _context.Sessions.FindAsync(sessionId);
+            if (session == null) return null;
+
+            // Check if the association already exists to avoid duplicates
+            bool alreadyLinked = plan.TrainingPlanSessions
+                .Any(tps => tps.SessionId == sessionId);
+
+            if (!alreadyLinked)
+            {
+                // Create the new TrainingPlanSession link
+                var trainingPlanSession = new TrainingPlanSession
+                {
+                    TrainingPlanId = planId,
+                    SessionId = sessionId
+                };
+
+                plan.TrainingPlanSessions.Add(trainingPlanSession);
+
+                await _context.SaveChangesAsync();
+            }
+
+            return plan;
+        }
+
     }
 }

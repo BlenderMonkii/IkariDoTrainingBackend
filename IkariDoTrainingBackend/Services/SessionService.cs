@@ -17,7 +17,7 @@ namespace IkariDoTrainingBackend.Services
         {
             // Asynchrones Laden
             return await _context.Sessions
-                .Include(s => s.TrainingPlans)
+                .Include(s => s.TrainingPlanSessions)
                 .Include(s => s.SessionExercises)
                 .ToListAsync();
         }
@@ -25,23 +25,23 @@ namespace IkariDoTrainingBackend.Services
         public async Task<Session> GetByIdAsync(int id)
         {
             return await _context.Sessions
-                .Include(s => s.TrainingPlans)
+                .Include(s => s.TrainingPlanSessions)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         public async Task<Session> CreateAsync(Session entity)
         {
-            // 1. Falls entity.TrainingPlans existiert, attach sie (damit EF weiß, dass sie schon existieren).
-            foreach (var tp in entity.TrainingPlans)
+            // 1. Attach existing TrainingPlans and create TrainingPlanSession entries
+            foreach (var tpSession in entity.TrainingPlanSessions)
             {
-                if (_context.Entry(tp).State == EntityState.Detached)
+                if (_context.Entry(tpSession.TrainingPlan).State == EntityState.Detached)
                 {
-                    // Wenn TrainingPlan nicht getrackt wird, anfügen (Attach).
-                    _context.TrainingPlans.Attach(tp);
+                    // Attach the existing TrainingPlan
+                    _context.TrainingPlans.Attach(tpSession.TrainingPlan);
                 }
             }
 
-            // 2. Session hinzufügen
+            // 2. Add the new Session along with its TrainingPlanSessions
             _context.Sessions.Add(entity);
 
             await _context.SaveChangesAsync();
@@ -51,11 +51,11 @@ namespace IkariDoTrainingBackend.Services
         public async Task<Session> UpdateAsync(Session entity)
         {
             var existing = await _context.Sessions
-                .Include(s => s.TrainingPlans)
+                .Include(s => s.TrainingPlanSessions)
                 .FirstOrDefaultAsync(s => s.Id == entity.Id);
             if (existing == null) return null;
 
-            // Felder übernehmen
+            // 1. Update basic fields
             existing.Name = entity.Name;
             existing.Description = entity.Description;
             existing.SessionDate = entity.SessionDate;
@@ -63,24 +63,28 @@ namespace IkariDoTrainingBackend.Services
             existing.IsPublic = entity.IsPublic;
             existing.OwnerId = entity.OwnerId;
 
-            // 1. Alte Verknüpfungen entfernen
-            existing.TrainingPlans.Clear();
+            // 2. Remove existing TrainingPlanSessions
+            _context.RemoveRange(existing.TrainingPlanSessions);
 
-            // 2. Neue zuweisen
-            foreach (var tp in entity.TrainingPlans)
+            // 3. Add new TrainingPlanSessions
+            foreach (var tpSession in entity.TrainingPlanSessions)
             {
-                // Falls EF diesen Trainingsplan noch nicht trackt, anhängen.
-                if (_context.Entry(tp).State == EntityState.Detached)
+                if (_context.Entry(tpSession.TrainingPlan).State == EntityState.Detached)
                 {
-                    _context.TrainingPlans.Attach(tp);
+                    _context.TrainingPlans.Attach(tpSession.TrainingPlan);
                 }
 
-                existing.TrainingPlans.Add(tp);
+                existing.TrainingPlanSessions.Add(new TrainingPlanSession
+                {
+                    TrainingPlanId = tpSession.TrainingPlanId,
+                    SessionId = existing.Id
+                });
             }
-            // Speichern
+
             await _context.SaveChangesAsync();
             return existing;
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {

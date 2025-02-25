@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace IkariDoTrainingBackend.Models
 {
@@ -31,8 +32,7 @@ namespace IkariDoTrainingBackend.Models
         public bool IsPublic { get; set; }
 
         // Many-to-Many Beziehung zu TrainingPlans
-        public virtual ICollection<TrainingPlan> TrainingPlans { get; set; } = new List<TrainingPlan>();
-
+        public virtual ICollection<TrainingPlanSession> TrainingPlanSessions { get; set; } = new List<TrainingPlanSession>();
         // Many-to-Many Beziehung zu ExerciseBase über SessionExercise
         public virtual ICollection<SessionExercise> SessionExercises { get; set; } = new List<SessionExercise>();
     }
