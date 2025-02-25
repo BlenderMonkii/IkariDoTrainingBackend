@@ -1,5 +1,6 @@
 ﻿using IkariDoTrainingBackend.Models;
 using IkariDoTrainingBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IkariDoTrainingBackend.Controllers
@@ -16,6 +17,7 @@ namespace IkariDoTrainingBackend.Controllers
         }
 
         // GET: api/TrainingPlan
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TrainingPlan>>> GetAll()
         {

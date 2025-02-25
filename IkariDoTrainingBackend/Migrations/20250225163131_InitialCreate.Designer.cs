@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IkariDoTrainingBackend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250225141624_CreateTrainingPlanSessionsTable")]
-    partial class CreateTrainingPlanSessionsTable
+    [Migration("20250225163131_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

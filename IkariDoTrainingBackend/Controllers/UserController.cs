@@ -1,5 +1,6 @@
 ﻿using IkariDoTrainingBackend.Models;
 using IkariDoTrainingBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace IkariDoTrainingBackend.Controllers
 {
@@ -15,6 +16,7 @@ namespace IkariDoTrainingBackend.Controllers
         }
 
         // GET: api/User
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
@@ -23,6 +25,7 @@ namespace IkariDoTrainingBackend.Controllers
         }
 
         // GET api/User/5
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {

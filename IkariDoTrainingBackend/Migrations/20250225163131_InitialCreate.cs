@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IkariDoTrainingBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class FixFingerboardExerciseMapping : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,6 +37,24 @@ namespace IkariDoTrainingBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Timers",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    rest_time = table.Column<int>(type: "int", nullable: true),
+                    active_time = table.Column<int>(type: "int", nullable: true),
+                    pause_time = table.Column<int>(type: "int", nullable: true),
+                    sets = table.Column<int>(type: "int", nullable: true),
+                    reps = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Timers", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "training_plans",
                 columns: table => new
                 {
@@ -60,21 +78,21 @@ namespace IkariDoTrainingBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
+                    name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Email = table.Column<string>(type: "longtext", nullable: false)
+                    email = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     password_hash = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_users", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -82,12 +100,12 @@ namespace IkariDoTrainingBackend.Migrations
                 name: "training_plan_sessions",
                 columns: table => new
                 {
-                    session_id = table.Column<int>(type: "int", nullable: false),
-                    training_plan_id = table.Column<int>(type: "int", nullable: false)
+                    training_plan_id = table.Column<int>(type: "int", nullable: false),
+                    session_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_training_plan_sessions", x => new { x.session_id, x.training_plan_id });
+                    table.PrimaryKey("PK_training_plan_sessions", x => new { x.training_plan_id, x.session_id });
                     table.ForeignKey(
                         name: "FK_training_plan_sessions_sessions_session_id",
                         column: x => x.session_id,
@@ -107,7 +125,7 @@ namespace IkariDoTrainingBackend.Migrations
                 name: "exercise_base",
                 columns: table => new
                 {
-                    exercise_id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     owner_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false)
@@ -118,16 +136,49 @@ namespace IkariDoTrainingBackend.Migrations
                     is_public = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     location = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    repetitions = table.Column<int>(type: "int", nullable: true)
+                    timer_id = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_exercise_base", x => x.exercise_id);
+                    table.PrimaryKey("PK_exercise_base", x => x.id);
                     table.ForeignKey(
-                        name: "FK_exercise_base_Users_owner_id",
+                        name: "FK_exercise_base_Timers_timer_id",
+                        column: x => x.timer_id,
+                        principalTable: "Timers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_exercise_base_users_owner_id",
                         column: x => x.owner_id,
-                        principalTable: "Users",
-                        principalColumn: "Id",
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Executions",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    exercise_id = table.Column<int>(type: "int", nullable: false),
+                    weight = table.Column<double>(type: "double", nullable: true),
+                    repetitions = table.Column<int>(type: "int", nullable: true),
+                    duration = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    rating = table.Column<int>(type: "int", nullable: true),
+                    comment = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Executions", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Executions_exercise_base_exercise_id",
+                        column: x => x.exercise_id,
+                        principalTable: "exercise_base",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -136,7 +187,7 @@ namespace IkariDoTrainingBackend.Migrations
                 name: "fingerboard_exercises",
                 columns: table => new
                 {
-                    exercise_id = table.Column<int>(type: "int", nullable: false),
+                    id = table.Column<int>(type: "int", nullable: false),
                     board_name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     edge_size = table.Column<float>(type: "float", nullable: false),
@@ -147,12 +198,12 @@ namespace IkariDoTrainingBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_fingerboard_exercises", x => x.exercise_id);
+                    table.PrimaryKey("PK_fingerboard_exercises", x => x.id);
                     table.ForeignKey(
-                        name: "FK_fingerboard_exercises_exercise_base_exercise_id",
-                        column: x => x.exercise_id,
+                        name: "FK_fingerboard_exercises_exercise_base_id",
+                        column: x => x.id,
                         principalTable: "exercise_base",
-                        principalColumn: "exercise_id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -173,7 +224,7 @@ namespace IkariDoTrainingBackend.Migrations
                         name: "FK_session_exercises_exercise_base_exercise_id",
                         column: x => x.exercise_id,
                         principalTable: "exercise_base",
-                        principalColumn: "exercise_id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_session_exercises_sessions_session_id",
@@ -185,9 +236,19 @@ namespace IkariDoTrainingBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Executions_exercise_id",
+                table: "Executions",
+                column: "exercise_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_exercise_base_owner_id",
                 table: "exercise_base",
                 column: "owner_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_exercise_base_timer_id",
+                table: "exercise_base",
+                column: "timer_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_session_exercises_exercise_id",
@@ -195,14 +256,17 @@ namespace IkariDoTrainingBackend.Migrations
                 column: "exercise_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_training_plan_sessions_training_plan_id",
+                name: "IX_training_plan_sessions_session_id",
                 table: "training_plan_sessions",
-                column: "training_plan_id");
+                column: "session_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Executions");
+
             migrationBuilder.DropTable(
                 name: "fingerboard_exercises");
 
@@ -222,7 +286,10 @@ namespace IkariDoTrainingBackend.Migrations
                 name: "training_plans");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Timers");
+
+            migrationBuilder.DropTable(
+                name: "users");
         }
     }
 }
