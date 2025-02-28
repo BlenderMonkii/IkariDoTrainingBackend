@@ -1,4 +1,5 @@
 ﻿using IkariDoTrainingBackend.Data;
+using IkariDoTrainingBackend.Dtos;
 using IkariDoTrainingBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,42 +14,89 @@ namespace IkariDoTrainingBackend.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Session>> GetAllAsync()
+        public async Task<IEnumerable<SessionDto>> GetAllAsync()
         {
             // Asynchrones Laden
-            return await _context.Sessions
+            var sessions = await _context.Sessions
+                //.Include(s => s.TrainingPlanSessions)
+                .Include(s => s.SessionExercises)
+                .ThenInclude(se => se.Exercise)
+                .ToListAsync();
+
+            // Konvertiere zu SessionDto
+            var sessionDtos = sessions.Select(s => new SessionDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Description = s.Description,
+                SessionDate = s.SessionDate,
+                Duration = s.Duration,
+                IsPublic = s.IsPublic,
+                OwnerId = s.OwnerId,
+                Type = s.Type,
+                SessionExercises = s.SessionExercises.ToList()
+            });
+
+            return sessionDtos;
+        }
+
+
+        public async Task<SessionDto> GetByIdAsync(int id)
+        {
+            var session = await _context.Sessions
                 .Include(s => s.TrainingPlanSessions)
                 .Include(s => s.SessionExercises)
-                .ToListAsync();
-        }
-
-        public async Task<Session> GetByIdAsync(int id)
-        {
-            return await _context.Sessions
-                .Include(s => s.TrainingPlanSessions)
+                .ThenInclude(se => se.Exercise)
                 .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (session == null) return null;
+
+            return new SessionDto
+            {
+                Id = session.Id,
+                Name = session.Name,
+                Description = session.Description,
+                SessionDate = session.SessionDate,
+                Duration = session.Duration,
+                IsPublic = session.IsPublic,
+                OwnerId = session.OwnerId,
+                Type = session.Type,
+                SessionExercises = session.SessionExercises.ToList()
+            };
         }
 
-        public async Task<Session> CreateAsync(Session entity)
+        public async Task<SessionDto> CreateAsync(SessionDto entity)
         {
-            // 1. Attach existing TrainingPlans and create TrainingPlanSession entries
-            foreach (var tpSession in entity.TrainingPlanSessions)
+            var session = new Session
             {
-                if (_context.Entry(tpSession.TrainingPlan).State == EntityState.Detached)
-                {
-                    // Attach the existing TrainingPlan
-                    _context.TrainingPlans.Attach(tpSession.TrainingPlan);
-                }
-            }
+                Name = entity.Name,
+                Description = entity.Description,
+                SessionDate = entity.SessionDate,
+                Duration = entity.Duration,
+                IsPublic = entity.IsPublic,
+                OwnerId = entity.OwnerId,
+                Type = entity.Type,
+                SessionExercises = entity.SessionExercises.ToList()
+            };
+
+            // 1. Attach existing TrainingPlans and create TrainingPlanSession entries
+            //foreach (var tpSession in session.TrainingPlanSessions)
+            //{
+            //    if (_context.Entry(tpSession.TrainingPlan).State == EntityState.Detached)
+            //    {
+            //        // Attach the existing TrainingPlan
+            //        _context.TrainingPlans.Attach(tpSession.TrainingPlan);
+            //    }
+            //}
 
             // 2. Add the new Session along with its TrainingPlanSessions
-            _context.Sessions.Add(entity);
+            _context.Sessions.Add(session);
 
             await _context.SaveChangesAsync();
             return entity;
         }
 
-        public async Task<Session> UpdateAsync(Session entity)
+        public async Task<SessionDto> UpdateAsync(SessionDto entity)
         {
             var existing = await _context.Sessions
                 .Include(s => s.TrainingPlanSessions)
@@ -62,28 +110,43 @@ namespace IkariDoTrainingBackend.Services
             existing.Duration = entity.Duration;
             existing.IsPublic = entity.IsPublic;
             existing.OwnerId = entity.OwnerId;
+            existing.Type = entity.Type;
 
             // 2. Remove existing TrainingPlanSessions
             _context.RemoveRange(existing.TrainingPlanSessions);
 
             // 3. Add new TrainingPlanSessions
-            foreach (var tpSession in entity.TrainingPlanSessions)
-            {
-                if (_context.Entry(tpSession.TrainingPlan).State == EntityState.Detached)
-                {
-                    _context.TrainingPlans.Attach(tpSession.TrainingPlan);
-                }
+            //foreach (var tpSession in entity.TrainingPlanSessions)
+            //{
+            //    if (_context.Entry(tpSession.TrainingPlan).State == EntityState.Detached)
+            //    {
+            //        _context.TrainingPlans.Attach(tpSession.TrainingPlan);
+            //    }
 
-                existing.TrainingPlanSessions.Add(new TrainingPlanSession
-                {
-                    TrainingPlanId = tpSession.TrainingPlanId,
-                    SessionId = existing.Id
-                });
-            }
+            //    existing.TrainingPlanSessions.Add(new TrainingPlanSession
+            //    {
+            //        TrainingPlanId = tpSession.TrainingPlanId,
+            //        SessionId = existing.Id
+            //    });
+            //}
 
             await _context.SaveChangesAsync();
-            return existing;
+
+            // Konvertiere zurück zu SessionDto
+            return new SessionDto
+            {
+                Id = existing.Id,
+                Name = existing.Name,
+                Description = existing.Description,
+                SessionDate = existing.SessionDate,
+                Duration = existing.Duration,
+                IsPublic = existing.IsPublic,
+                OwnerId = existing.OwnerId,
+                Type = existing.Type,
+                SessionExercises = existing.SessionExercises.ToList()
+            };
         }
+
 
 
         public async Task<bool> DeleteAsync(int id)
@@ -109,7 +172,8 @@ namespace IkariDoTrainingBackend.Services
                 SessionId = sessionId,
                 ExerciseId = exerciseId,
                 Sets = sets,
-                PauseTime = pauseTime
+                PauseTime = pauseTime,
+                Exercise = exercise,
             };
 
             _context.SessionExercises.Add(sessionExercise);

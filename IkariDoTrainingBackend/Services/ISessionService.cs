@@ -3,7 +3,7 @@ using IkariDoTrainingBackend.Models;
 
 namespace IkariDoTrainingBackend.Services
 {
-    public interface ISessionService : ICrudService<Session>
+    public interface ISessionService : ICrudService<SessionDto>
     {
         // Falls du noch spezielle Methoden brauchst, hier ergänzen
         // z.B. Task<IEnumerable<Session>> GetByTrainingPlanIdAsync(int planId);

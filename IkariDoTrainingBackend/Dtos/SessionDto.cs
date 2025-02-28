@@ -13,8 +13,8 @@ namespace IkariDoTrainingBackend.Dtos
         public DateTime? SessionDate { get; set; }
         public int Duration { get; set; }
         public bool IsPublic { get; set; }
-
-        public List<SessionExercise> SessionExercises { get; set; }
+        public string Type { get; set; }
+        public List<SessionExercise>? SessionExercises { get; set; }
 
     }
 }

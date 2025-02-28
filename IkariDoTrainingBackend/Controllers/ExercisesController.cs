@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IkariDoTrainingBackend.Controllers
 {
-    [Route("api/exercises")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ExercisesController : ControllerBase
     {

@@ -31,6 +31,9 @@ namespace IkariDoTrainingBackend.Models
         [Column("is_public")]
         public bool IsPublic { get; set; }
 
+        [Column("type")]
+        public string Type { get; set; }
+
         // Many-to-Many Beziehung zu TrainingPlans
         public virtual ICollection<TrainingPlanSession> TrainingPlanSessions { get; set; } = new List<TrainingPlanSession>();
         // Many-to-Many Beziehung zu ExerciseBase über SessionExercise

@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace IkariDoTrainingBackend.Models.Exercises
 {
@@ -44,6 +45,7 @@ namespace IkariDoTrainingBackend.Models.Exercises
         public User? Owner { get; set; }
 
         public virtual ICollection<Execution> Executions { get; set; } = new List<Execution>();
+        [JsonIgnore]
         public virtual ICollection<SessionExercise> SessionExercises { get; set; } = new List<SessionExercise>();
     }
 }
