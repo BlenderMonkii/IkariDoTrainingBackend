@@ -76,9 +76,10 @@ namespace IkariDoTrainingBackend.Services
                 IsPublic = entity.IsPublic,
                 OwnerId = entity.OwnerId,
                 Type = entity.Type,
-                SessionExercises = entity.SessionExercises.ToList()
             };
 
+            _context.Sessions.Add(session);
+            await _context.SaveChangesAsync();
             // 1. Attach existing TrainingPlans and create TrainingPlanSession entries
             //foreach (var tpSession in session.TrainingPlanSessions)
             //{
@@ -89,12 +90,19 @@ namespace IkariDoTrainingBackend.Services
             //    }
             //}
 
-            // 2. Add the new Session along with its TrainingPlanSessions
-            _context.Sessions.Add(session);
-
-            await _context.SaveChangesAsync();
-            return entity;
+            return new SessionDto
+            {
+                Id = session.Id,
+                Name = session.Name,
+                Description = session.Description,
+                SessionDate = session.SessionDate,
+                Duration = session.Duration,
+                IsPublic = session.IsPublic,
+                OwnerId = session.OwnerId,
+                Type = session.Type
+            };
         }
+
 
         public async Task<SessionDto> UpdateAsync(SessionDto entity)
         {
@@ -193,6 +201,51 @@ namespace IkariDoTrainingBackend.Services
             _context.SessionExercises.Remove(sessionExercise);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<SessionDto>> GetAllByOwnerIdAsync(int ownerId)
+        {
+            var sessions = await _context.Sessions
+                .Where(s => s.OwnerId == ownerId) // || s.IsPublic == true
+                .Include(s => s.SessionExercises)
+                .ToListAsync();
+
+            var sessionDtos = sessions.Select(s => new SessionDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Description = s.Description,
+                SessionDate = s.SessionDate,
+                Duration = s.Duration,
+                IsPublic = s.IsPublic,
+                OwnerId = s.OwnerId,
+                Type = s.Type,
+                SessionExercises = s.SessionExercises.ToList()
+            });
+
+            return sessionDtos;
+        }
+
+        public async Task<SessionDto> GetByIdAndOwnerAsync(int sessionId, int ownerId)
+        {
+            var session = await _context.Sessions
+                .Include(s => s.SessionExercises)
+                .FirstOrDefaultAsync(s => s.Id == sessionId && (s.OwnerId == ownerId || s.IsPublic));
+
+            if (session == null) return null;
+
+            return new SessionDto
+            {
+                Id = session.Id,
+                Name = session.Name,
+                Description = session.Description,
+                SessionDate = session.SessionDate,
+                Duration = session.Duration,
+                IsPublic = session.IsPublic,
+                OwnerId = session.OwnerId,
+                Type = session.Type,
+                SessionExercises = session.SessionExercises.ToList()
+            };
         }
     }
 }

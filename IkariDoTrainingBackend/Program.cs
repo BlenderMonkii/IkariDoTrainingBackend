@@ -1,7 +1,10 @@
 using IkariDoTrainingBackend.Data;
+using IkariDoTrainingBackend.Infrastructure.Authorization.Handlers;
+using IkariDoTrainingBackend.Infrastructure.Authorization.Requirements;
 using IkariDoTrainingBackend.Models.Exercises;
 using IkariDoTrainingBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -35,6 +38,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ResourceOwnerPolicy", policy =>
+    {
+        policy.Requirements.Add(new ResourceOwnerRequirement());
+    });
+});
 
 builder.Services.AddCors(options =>
 {
@@ -74,6 +84,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 34)) 
     ));
 
+
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IAuthorizationHandler, ResourceOwnerAuthorizationHandler>();
+
 builder.Services.AddScoped<JwtTokenService>();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -86,7 +101,35 @@ builder.Services.AddScoped<IExecutionService, ExecutionService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // (A1) SecurityDefinition für "Bearer" Token anlegen
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Gib hier deinen JWT Token ein (\"Bearer <token>\")"
+    });
+
+    // (A2) SecurityRequirement festlegen
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -101,6 +144,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

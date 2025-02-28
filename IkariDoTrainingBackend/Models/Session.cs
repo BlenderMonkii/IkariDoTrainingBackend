@@ -35,8 +35,8 @@ namespace IkariDoTrainingBackend.Models
         public string Type { get; set; }
 
         // Many-to-Many Beziehung zu TrainingPlans
-        public virtual ICollection<TrainingPlanSession> TrainingPlanSessions { get; set; } = new List<TrainingPlanSession>();
+        public virtual ICollection<TrainingPlanSession>? TrainingPlanSessions { get; set; } = new List<TrainingPlanSession>();
         // Many-to-Many Beziehung zu ExerciseBase über SessionExercise
-        public virtual ICollection<SessionExercise> SessionExercises { get; set; } = new List<SessionExercise>();
+        public virtual ICollection<SessionExercise>? SessionExercises { get; set; } = new List<SessionExercise>();
     }
 }
